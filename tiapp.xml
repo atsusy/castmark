@@ -5,9 +5,9 @@
 <version>1.0</version>
 <publisher>LANGRISE Co.,Ltd.</publisher>
 <url>http://www.langrise.co.jp</url>
-<description>castmark is podcast player.</description>
+<description>castmark is markable podcast player.</description>
 <copyright>2011 by LANGRISE Co.,Ltd.</copyright>
-<icon>default_app_logo.png</icon>
+<icon>appicon.png</icon>
     <persistent-wifi>false</persistent-wifi>
     <prerendered-icon>false</prerendered-icon>
     <statusbar-style>default</statusbar-style>
@@ -26,9 +26,14 @@
 			<orientation>Ti.UI.LANDSCAPE_LEFT</orientation>
 			<orientation>Ti.UI.LANDSCAPE_RIGHT</orientation>
 		</orientations>
+		<backgroundModes>
+    		<mode>audio</mode>
+		</backgroundModes>
+
 	</iphone>
 	<android xmlns:android="http://schemas.android.com/apk/res/android">
 	</android>
 	<modules>
+		<module version="0.1">com.tiaudiostreaming</module>
 	</modules>
 </ti:app>

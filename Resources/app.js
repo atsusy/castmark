@@ -33,3 +33,41 @@ tabGroup.addEventListener('focus', function(e){
 });
 // open tab group
 tabGroup.open();
+
+function isiOS4Plus()
+{
+	// add iphone specific tests
+	if (Titanium.Platform.name == 'iPhone OS')
+	{
+		var version = Titanium.Platform.version.split(".");
+		var major = parseInt(version[0], 10);
+		
+		// can only test this support on a 3.2+ device
+		if (major >= 4)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+if (isiOS4Plus())
+{
+	// listen for a local notification event
+	Ti.App.iOS.addEventListener('notification',function(e)
+	{
+		Ti.API.info("local notification received: "+JSON.stringify(e));
+	});
+
+	// fired when an app resumes for suspension
+	Ti.App.addEventListener('resume',function(e){
+		Ti.API.info("app is resuming from the background");
+	});
+	Ti.App.addEventListener('resumed',function(e){
+		Ti.API.info("app has resumed from the background");
+	});
+
+	Ti.App.addEventListener('pause',function(e){
+		Ti.API.info("app was paused from the foreground");
+	});
+}

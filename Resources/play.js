@@ -1,3 +1,4 @@
+Titanium.include("common.js");
 Titanium.include("db.js");
 
 var window = Titanium.UI.currentWindow;
@@ -5,6 +6,10 @@ window.barColor = '#222';
 
 var audioStop = Ti.UI.createButton({
 	systemButton: Ti.UI.iPhone.SystemButton.STOP
+});
+
+var tagLists = Ti.UI.createButton({
+	image:'list.png'
 });
 
 var audioStopping = Ti.UI.createActivityIndicator({
@@ -30,16 +35,52 @@ var audioOperation = Ti.UI.createButton({
 });
 
 var sec2str = function(seconds){
-	var suppress = function(value, n){
-		var str = "0"*n + value.toString();
-		str = str.substr(str.length-n,	n);
-		return str;
-	};
-
 	var mm = parseInt((seconds%3600)/60, 10);
 	var ss = parseInt(seconds%60, 10);
 	
 	return suppress(mm,2)+":"+suppress(ss,2);
+};
+
+var audioRewind = Ti.UI.createButton({
+	title:'15',
+	font:{fontSize:10},
+	width:32,
+	height:32,
+	color:'#FFF',
+	top:74,
+	left:24,
+	backgroundImage:''
+});
+
+var audioRewinding = Ti.UI.createImageView({
+	top:74,
+	left:24,
+	width:32,
+	height:32,
+	image:'rewind.png'
+});
+
+var rewindingAnimationStop;
+var rewindingAnimation = function(){
+	var r = Ti.UI.create2DMatrix();
+	r = r.rotate(-180);
+	audioRewinding.animate({transform:r,duration:500,opacity:0.0}, function(){
+		audioRewinding.image = 'rewindr.png';
+		var r = Ti.UI.create2DMatrix();
+		audioRewinding.animate({duration:0,transform:r}, function(){
+			var r = Ti.UI.create2DMatrix();
+			r = r.rotate(-180);
+			audioRewinding.animate({duration:500,transform:r, opacity:1.0}, function(){
+				var r = Ti.UI.create2DMatrix();
+				audioRewinding.animate({duration:0,transform:r}, function(){
+					audioRewinding.image = 'rewind.png';
+					if(!rewindingAnimationStop){
+						rewindingAnimation();
+					}
+				});
+			});
+		});
+	});
 };
 
 var audioActivity = Ti.UI.createActivityIndicator({
@@ -92,8 +133,8 @@ audioTags.insertTag = function(tag){
 	
 	var point = Ti.UI.createLabel({
 		left:4,
-		width:48,
-		height:'auto',
+		width:54,
+		height:24,
 		backgroundColor:'#888',
 		text:sec2str(tag.point),
 		font:{fontSize:12, fontFamily:'HelveticaNeue-Bold'},
@@ -102,8 +143,27 @@ audioTags.insertTag = function(tag){
 		color:'#fff'
 	});
 	
+	point.addEventListener('click', function(e){
+		var tagPointWindow = Ti.UI.createWindow({
+			url:'tagPoint.js',
+			height:0,
+			bottom:0
+		});
+		tagPointWindow.initialPoint = tag.point;
+	
+		tagPointWindow.addEventListener('close', function(e){
+			tag.point = tagPointWindow.editPoint;
+			tag.update();
+			audioTags.removeTag(tag);
+			audioTags.checkTags();
+		});
+
+		var animation = Ti.UI.createAnimation({height:260, duration:300});
+		tagPointWindow.open(animation);
+	});	
+	
 	var content = Ti.UI.createLabel({
-		left:55,
+		left:64,
 		width:'auto',
 		height:'auto',
 		text:'\n'+tag.content+'\n '
@@ -191,25 +251,25 @@ audioPlayer.addEventListener('change', function(e){
 	Ti.API.info("audioPlayer status changed:"+audioPlayer.state);
 	
 	if(audioPlayer.state == audioPlayer.STATE_INITIALIZED){
-		if(audioStopping.visible){
-			audioStopping.hide();
-			window.close();
-		}
-	}
-	
-	if(audioPlayer.state == audioPlayer.STATE_STOPPED){
-		Ti.API.info("duration:"+playContext.duration+" value:"+playContext.value);
+		Ti.API.info("duration:"+playContext.duration+" progress:"+playContext.progress);
 		if(audioPlayer.errorCode == audioPlayer.ERR_NO_ERROR){
 			// normally stopped
-			audioPlayer.fireEvent('progress', { duration:0, progress:0 });
+			if(audioStopping.visible){
+				audioStopping.hide();
+				window.close();
+			}else{
+				audioPlayer.fireEvent('progress', { duration:0, progress:0 });
+			}
 		}else{
 			// abnormally stopped
+			Ti.API.error("audioPlayer abnormally initialized errorCode:"+audioPlayer.errorCode);
 			playContext.resume = playContext.progress;
 		}
 		audioPlayer.url = window.item.url;	
 	}
 
 	if(audioPlayer.state == audioPlayer.STATE_PLAYING){
+		Ti.API.info("resume:"+playContext.resume+" seek:"+playContext.seek);
 		if(playContext.resume){
 			Ti.API.info("trying to resume:"+playContext.resume);
 			audioPlayer.volume = 0;
@@ -217,11 +277,11 @@ audioPlayer.addEventListener('change', function(e){
 			playContext.seek = playContext.resume;
 			playContext.resume = 0;
 			return;
-		}
-		else if(playContext.seek){
+		}else if(playContext.seek){
 			Ti.API.info("successfully resumed:"+playContext.seek);
 			audioPlayer.fadein(500);
 			playContext.seek = 0;
+			rewindingAnimationStop = true;
 		}
 	}
 	
@@ -274,12 +334,30 @@ audioOperation.addEventListener('click', function(e){
 	}
 });
 
+audioRewind.addEventListener('click', function(e){
+	if(playContext.seek == 0 && audioPlayer.playing){
+		var point = audioPlayer.progress - 15;
+		if(point < 0){
+			point = 0.001;
+		}
+		audioPlayer.seek(point);
+		playContext.seek = point;
+		
+		rewindingAnimationStop = false;
+		rewindingAnimation();
+	}
+});
+
 audioTags.addEventListener('click', function(e){
-	if(audioPlayer.playing)
-	{
+	Ti.API.info("source:"+e.source+" row:"+e.row+" equal:"+(e.row == e.source));
+	if(e.source !== e.row){
+		return;
+	}
+
+	if(playContext.seek == 0 && audioPlayer.playing){
 		var point = currentTags[e.index].point - 5;
 		if(point < 0){
-			point = 0;
+			point = 0.001; // zero
 		}
 		audioPlayer.seek(point);
 		playContext.seek = point;
@@ -313,9 +391,12 @@ audioStop.addEventListener('click', function(e){
 	}
 });
 
+window.rightNavButton = tagLists;
 window.leftNavButton = audioStop;
 audioStop.add(audioStopping);
 window.add(audioOperation);
+window.add(audioRewinding);
+window.add(audioRewind);
 window.add(audioProgress);
 audioOperation.add(audioActivity);
 window.add(audioSeeker);

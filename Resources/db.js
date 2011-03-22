@@ -232,7 +232,10 @@ function Tag(args){
 	};
 	
 	this.update = function(){
-		this.exec_db(function(db){db.execute('UPDATE TAG SET CONTENT=? WHERE ID=?', this.id);});
+		if(!this.id){
+			Ti.API.error("tag is not persisted.");
+		}
+		this.exec_db(function(db){db.execute('UPDATE TAG SET CONTENT=?, POINT=? WHERE ID=?', this.content, this.point, this.id);});
 		Ti.API.info("tag was updated. url:"+this.url+" point:"+this.point+" content:"+this.content);
 	};
 	

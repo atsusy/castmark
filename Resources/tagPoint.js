@@ -3,7 +3,7 @@ Ti.include('common.js');
 var window = Ti.UI.currentWindow;
 
 var done = Ti.UI.createButton({
-	title:'Close',
+	title:L('Close'),
 	style:Ti.UI.iPhone.SystemButtonStyle.DONE
 });
 	
@@ -30,7 +30,8 @@ for(var j = 0; j < 2; j++){
 			width:'auto',
 			height:'auto',
 			text:suppress(i,2),
-			textAlign:'center'
+			textAlign:'center',
+			font:{fontSize:32, fontFamily:"HelveticaNeue-Bold"}
 		});
 		row.add(label);
 		column.addRow(row);
@@ -41,8 +42,8 @@ picker.selectionIndicator = true;
 
 window.addEventListener('open', function(e){
 	window.editPoint = window.initialPoint;
-	picker.setSelectedRow(0, parseInt(window.initialPoint, 10) / 60, true);
-	picker.setSelectedRow(1, parseInt(window.initialPoint, 10) % 60, true);
+	picker.setSelectedRow(0, parseInt(window.initialPoint, 10) / 60, false);
+	picker.setSelectedRow(1, parseInt(window.initialPoint, 10) % 60, false);
 });
 
 done.addEventListener('click', function(e){

@@ -1,12 +1,12 @@
 Titanium.include("db.js");
 
 var playsWindow = Titanium.UI.createWindow({
-	title:'Playlist',
+	title:L('Playlist'),
 	barColor:'#222'
 });
 
 var playsFilter = Titanium.UI.createTabbedBar({
-	labels:['All', 'History'],
+	labels:[L('All'), L('History')],
 	style:Titanium.UI.iPhone.SystemButtonStyle.BAR,
 	index:0,
 	backgroundColor:'#555'

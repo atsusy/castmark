@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<string name="Feed">フィード</string>
+	<string name="Playlist">プレイリスト</string>
+	<string name="Tag">タグ</string>
+	<string name="Tags">タグの一覧</string>
+	<string name="Play">再生</string>
+	<string name="All">全て</string>
+	<string name="History">履歴</string>
+	<string name="Search Feed">フィードを探す</string>
+	<string name="Prev">前へ</string>
+	<string name="Next">次へ</string>
+	<string name="Close">閉じる</string>
+	<string name="DictionaryNoEntry">辞書に記述がない、もしくはネットワークエラーです。</string>
+	<string name="PointEditNotClosed">記録時間の編集ウィンドウを閉じて下さい。</string>
+</resources>

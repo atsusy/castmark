@@ -2,7 +2,7 @@ Ti.include('db.js');
 
 var window = Titanium.UI.currentWindow;
 
-window.title = 'Search Feed';	
+window.title = L('Search Feed');	
 window.barColor = '#222';
 
 var webView = Titanium.UI.createWebView({

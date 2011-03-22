@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<string name="Feed">Feed</string>
+	<string name="Playlist">Playlist</string>
+	<string name="Tags">Tags</string>
+	<string name="Tag">Tag</string>
+	<string name="Play">Play</string>
+	<string name="All">All</string>
+	<string name="History">History</string>
+	<string name="Search Feed">Search Feed</string>
+	<string name="Prev">Prev</string>
+	<string name="Next">Next</string>
+	<string name="Close">Close</string>
+	<string name="DictionaryNoEntry">no entries, or network error.</string>
+	<string name="PointEditNotClosed">Close Point-Edit dialog.</string>
+	
+</resources>

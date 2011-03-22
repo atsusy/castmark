@@ -29,7 +29,7 @@ var dataOfFeeds = function(){
 };
 
 var feedWindow = Titanium.UI.createWindow({
-	title:'Feed',
+	title:L('Feed'),
 	barColor:'#222'
 });
 

@@ -10,7 +10,7 @@ var dictionaryView = Ti.UI.createWebView({
 	backgroundColor:'#000'
 });
 
-var noentry_html = '<html><body><font color="#ffffff">no entries, or network error.</body></html>';
+var noentry_html = '<html><body><font color="#ffffff">'+L('DictionaryNoEntry')+'</body></html>';
 
 dictionaryView.add(dictionarySearching);
 dictionarySearching.show();

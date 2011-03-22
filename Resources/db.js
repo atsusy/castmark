@@ -228,12 +228,24 @@ function Tag(args){
 
 	this.add = function(){
 		this.exec_db(function(db){db.execute('INSERT INTO TAG (URL, POINT, CONTENT) VALUES (?, ?, ?)', this.url, this.point, this.content);});
+		
+		this.exec_db(function(db){
+			var rows = db.execute('SELECT MAX(ID) FROM TAG');
+			if(rows.isValidRow()){
+				this.id = rows.field(0);
+				Ti.API.info("generated TAG id:"+this.id);  			
+			}else{
+				Ti.API.error("cannot get generated TAG id.");  			
+			}
+		});
+		
 		Ti.API.info("tag was added. url:"+this.url+" point:"+this.point+" content:"+this.content);
 	};
 	
 	this.update = function(){
 		if(!this.id){
 			Ti.API.error("tag is not persisted.");
+			return;
 		}
 		this.exec_db(function(db){db.execute('UPDATE TAG SET CONTENT=?, POINT=? WHERE ID=?', this.content, this.point, this.id);});
 		Ti.API.info("tag was updated. url:"+this.url+" point:"+this.point+" content:"+this.content);

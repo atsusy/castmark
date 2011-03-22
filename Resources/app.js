@@ -9,13 +9,13 @@ Titanium.include("playlist.js");
 
 var tab1 = Titanium.UI.createTab({  
     icon:'feed.png',
-    title:'Feed',
+    title:L('Feed'),
     window:feedWindow
 });
 
 var tab2 = Titanium.UI.createTab({  
     icon:'playlist.png',
-    title:'Playlist',
+    title:L('Playlist'),
     window:playsWindow
 });
 

@@ -1,9 +1,6 @@
 Ti.include('db.js');
 
 var tagWindow = Ti.UI.currentWindow;
-tagWindow.title = 'Tag';
-tagWindow.backButtonTitle = 'Play';
-tagWindow.backgroundColor = '#000';
 
 var candidates;
 var candidatesIndex;
@@ -16,7 +13,7 @@ var candidateText = Ti.UI.createLabel({
 	borderRadius:3
 });
 
-var candidateSwitcherButtons = [{title:'Prev', enabled:false}, {image:'dictionary.png'}, {title:'Next', enabled:false}];
+var candidateSwitcherButtons = [{title:L('Prev'), enabled:false}, {image:'dictionary.png'}, {title:L('Next'), enabled:false}];
 var candidateSwitcher = Ti.UI.createButtonBar({
 	labels:candidateSwitcherButtons,
 	backgroundColor:'#555'
@@ -165,12 +162,14 @@ candidateSwitcher.addEventListener('click', function(e){
 
 tagWindow.addEventListener('return', function(e){
 	if(tagContent.value){
+		/*
 		var tag = new Tag({
 			url:tagWindow.playing_url,
 			point:tagWindow.playing_point,
 			content:tagContent.value
 		});
-		tagWindow.entered = tag;
+		tagWindow.entered = tag;*/
+		tagWindow.entered = tagContent.value;
 	}
 	tagWindow.close();
 });		

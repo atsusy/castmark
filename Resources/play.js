@@ -8,14 +8,14 @@ var audioStop = Ti.UI.createButton({
 	systemButton: Ti.UI.iPhone.SystemButton.STOP
 });
 
-var tagLists = Ti.UI.createButton({
-	image:'list.png'
-});
-
 var audioStopping = Ti.UI.createActivityIndicator({
 	width:32,
 	height:32,
 	style:Ti.UI.iPhone.ActivityIndicatorStyle.DARK
+});
+
+var tagLists = Ti.UI.createButton({
+	image:'list.png'
 });
 
 var audioStreaming = require('com.tiaudiostreaming');
@@ -43,12 +43,12 @@ var sec2str = function(seconds){
 
 var audioRewind = Ti.UI.createButton({
 	title:'15',
-	font:{fontSize:10},
-	width:32,
-	height:32,
+	font:{fontSize:10, fontFamily:'Verdana-Bold'},
+	width:48,
+	height:48,
 	color:'#FFF',
-	top:74,
-	left:24,
+	top:66,
+	left:16,
 	backgroundImage:''
 });
 
@@ -62,6 +62,9 @@ var audioRewinding = Ti.UI.createImageView({
 
 var rewindingAnimationStop;
 var rewindingAnimation = function(){
+	audioRewinding.image = 'rewind.png';
+	audioRewinding.transform = Ti.UI.create2DMatrix();
+	
 	var r = Ti.UI.create2DMatrix();
 	r = r.rotate(-180);
 	audioRewinding.animate({transform:r,duration:500,opacity:0.0}, function(){
@@ -71,13 +74,9 @@ var rewindingAnimation = function(){
 			var r = Ti.UI.create2DMatrix();
 			r = r.rotate(-180);
 			audioRewinding.animate({duration:500,transform:r, opacity:1.0}, function(){
-				var r = Ti.UI.create2DMatrix();
-				audioRewinding.animate({duration:0,transform:r}, function(){
-					audioRewinding.image = 'rewind.png';
-					if(!rewindingAnimationStop){
-						rewindingAnimation();
-					}
-				});
+				if(!rewindingAnimationStop){
+					rewindingAnimation();
+				}
 			});
 		});
 	});
@@ -126,6 +125,7 @@ audioTags.contains = function(tag){
 	return false;
 };
 
+var tagPointWindowActive;
 audioTags.insertTag = function(tag){
 	var row = Ti.UI.createTableViewRow({
 		height:'auto'
@@ -144,6 +144,7 @@ audioTags.insertTag = function(tag){
 	});
 	
 	point.addEventListener('click', function(e){
+		if(tagPointWindowActive){ return; }
 		var tagPointWindow = Ti.UI.createWindow({
 			url:'tagPoint.js',
 			height:0,
@@ -153,12 +154,22 @@ audioTags.insertTag = function(tag){
 	
 		tagPointWindow.addEventListener('close', function(e){
 			tag.point = tagPointWindow.editPoint;
+			point.text = sec2str(tag.point);
 			tag.update();
-			audioTags.removeTag(tag);
-			audioTags.checkTags();
+			if(!audioPlayer.idle){
+				audioPlayer.start();
+			}
+			tagPointWindowActive = false;
+			window.touchEnabled = true;
 		});
 
 		var animation = Ti.UI.createAnimation({height:260, duration:300});
+		if(!audioPlayer.idle){
+			audioPlayer.pause();
+		}
+		
+		tagPointWindowActive = true;
+		window.touchEnabled = false;
 		tagPointWindow.open(animation);
 	});	
 	
@@ -307,17 +318,26 @@ audioOperation.addEventListener('click', function(e){
 		var tagWindow = Ti.UI.createWindow({
 			url:'tag.js',
 			backgroundColor:'#000',
+			backButtonTitle:L('Play'),
 			barColor:'#222'
 		});
+		
+		tagWindow.title = L('Tag');
+
 		tagWindow.playing_url = window.item.url;
 		tagWindow.playing_point = playContext.progress;
 		
 		tagWindow.addEventListener('close', function(e){
-			var tag = tagWindow.entered;
-			if(tag){
+			var content = tagWindow.entered;
+			if(content){
+				var tag = new Tag({
+					url:tagWindow.playing_url,
+					point:tagWindow.playing_point,
+					content:content
+				});
 				tag.add();
 				audioTags.insertTag(tag);
-				sourceTags.push(tag);
+				sourceTags.push(tag);			
 			}
 			Ti.API.info("tag window closed.");
 			audioPlayer.start();
@@ -349,8 +369,8 @@ audioRewind.addEventListener('click', function(e){
 });
 
 audioTags.addEventListener('click', function(e){
-	Ti.API.info("source:"+e.source+" row:"+e.row+" equal:"+(e.row == e.source));
-	if(e.source !== e.row){
+	Ti.API.info("source:"+typeof(e.source)+" row:"+typeof(e.row));
+	if(typeof(e.source) !== typeof(e.row)){
 		return;
 	}
 
@@ -383,12 +403,43 @@ audioTags.addEventListener('delete', function(e){
 });
 
 audioStop.addEventListener('click', function(e){
-	if(audioPlayer.playing){
+	if(tagPointWindowActive){
+		alert(L('PointEditNotClosed'));
+		return;
+	}
+
+	if(audioPlayer.idle){
+		window.close();
+	}else{
 		audioStopping.show();
 		audioPlayer.stop();
-	}else{
-		window.close();
 	}
+});
+
+tagLists.addEventListener('click', function(e){
+	if(tagPointWindowActive){
+		alert(L('PointEditNotClosed'));
+		return;
+	}
+
+	var tagListWindow = Ti.UI.createWindow({
+		url:'taglist.js',
+		title:L('Tags'),
+		backButtonTitle:L('Play'),
+		barColor:'#222',
+		backgroundColor:'#888'
+	});
+	
+	tagListWindow.addEventListener('close', function(e){
+		if(!audioPlayer.idle){
+			audioPlayer.start();
+		}
+	});
+	
+	if(!audioPlayer.idle){
+		audioPlayer.pause();
+	}
+	Ti.UI.currentTab.open(tagListWindow, {animated:true});
 });
 
 window.rightNavButton = tagLists;

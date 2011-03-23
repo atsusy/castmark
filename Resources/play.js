@@ -34,21 +34,14 @@ var audioOperation = Ti.UI.createButton({
 	width:'100%'
 });
 
-var sec2str = function(seconds){
-	var mm = parseInt((seconds%3600)/60, 10);
-	var ss = parseInt(seconds%60, 10);
-	
-	return suppress(mm,2)+":"+suppress(ss,2);
-};
-
 var audioRewind = Ti.UI.createButton({
 	title:'15',
 	font:{fontSize:10, fontFamily:'Verdana-Bold'},
+	top:66,
+	left:16,
 	width:48,
 	height:48,
 	color:'#FFF',
-	top:66,
-	left:16,
 	backgroundImage:''
 });
 
@@ -126,11 +119,7 @@ audioTags.contains = function(tag){
 };
 
 var tagPointWindowActive;
-audioTags.insertTag = function(tag){
-	var row = Ti.UI.createTableViewRow({
-		height:'auto'
-	});
-	
+audioTags.insertTag = function(tag){	
 	var point = Ti.UI.createLabel({
 		left:4,
 		width:54,
@@ -140,7 +129,8 @@ audioTags.insertTag = function(tag){
 		font:{fontSize:12, fontFamily:'HelveticaNeue-Bold'},
 		borderRadius:4,
 		textAlign:'center',
-		color:'#fff'
+		color:'#fff',
+		control_id:1
 	});
 	
 	point.addEventListener('click', function(e){
@@ -175,13 +165,40 @@ audioTags.insertTag = function(tag){
 	
 	var content = Ti.UI.createLabel({
 		left:64,
-		width:'auto',
+		right:56,
 		height:'auto',
-		text:'\n'+tag.content+'\n '
+		text:'\n'+tag.content+'\n ',
+		control_id:2
 	});
 	
+	var playback = Ti.UI.createButton({
+		right:8,
+		width:48,
+		height:48,
+		image:'playback.png',
+		backgroundImage:'',
+		control_id:3
+	});
+	
+	playback.addEventListener('click', function(e){
+		if(playContext.seek == 0 && audioPlayer.playing){
+			var point = tag.point - 5;
+			if(point < 0){
+				point = 0.001; // zero
+			}
+			audioPlayer.seek(point);
+			playContext.seek = point;
+		}		
+	});
+	
+	var row = Ti.UI.createTableViewRow({
+		content:content,
+		height:'auto'
+	});
+
 	row.add(point);
 	row.add(content);
+	row.add(playback);
 	
 	var style = Titanium.UI.iPhone.RowAnimationStyle.FADE;
 	if(!currentTags.length){
@@ -311,7 +328,7 @@ audioPlayer.addEventListener('change', function(e){
 });
 
 audioOperation.addEventListener('click', function(e){
-	if(!audioPlayer.playing){
+	if(audioPlayer.idle){
 		audioPlayer.start();
 	}else{
 		audioPlayer.pause();
@@ -319,10 +336,9 @@ audioOperation.addEventListener('click', function(e){
 			url:'tag.js',
 			backgroundColor:'#000',
 			backButtonTitle:L('Play'),
-			barColor:'#222'
+			barColor:'#222',
+			title:L('Tag')
 		});
-		
-		tagWindow.title = L('Tag');
 
 		tagWindow.playing_url = window.item.url;
 		tagWindow.playing_point = playContext.progress;
@@ -369,18 +385,39 @@ audioRewind.addEventListener('click', function(e){
 });
 
 audioTags.addEventListener('click', function(e){
-	Ti.API.info("source:"+typeof(e.source)+" row:"+typeof(e.row));
-	if(typeof(e.source) !== typeof(e.row)){
+	var contentLabel = e.rowData.content;
+
+	if(e.source.control_id == 1 ||
+	   e.source.control_id == 3){
 		return;
 	}
+	
+	if(audioPlayer.playing){
+		audioPlayer.pause();
 
-	if(playContext.seek == 0 && audioPlayer.playing){
-		var point = currentTags[e.index].point - 5;
-		if(point < 0){
-			point = 0.001; // zero
-		}
-		audioPlayer.seek(point);
-		playContext.seek = point;
+		var tag = currentTags[e.index];
+		var tagWindow = Ti.UI.createWindow({
+			url:'tag.js',
+			backgroundColor:'#000',
+			backButtonTitle:L('Play'),
+			barColor:'#222',
+			title:L('Tag')
+		});
+
+		tagWindow.playing_url = tag.url;
+		tagWindow.playing_point = tag.point;
+		tagWindow.initial_content = tag.content;
+		tagWindow.addEventListener('close', function(e){
+			var content = tagWindow.entered;
+			if(content){
+				tag.content = content;
+				tag.update();
+				contentLabel.text = content;
+			}
+			Ti.API.info("tag window closed.");
+			audioPlayer.start();
+		});
+		Ti.UI.currentTab.open(tagWindow);
 	}
 });
 
@@ -427,7 +464,8 @@ tagLists.addEventListener('click', function(e){
 		title:L('Tags'),
 		backButtonTitle:L('Play'),
 		barColor:'#222',
-		backgroundColor:'#888'
+		backgroundColor:'#888',
+		allTags:sourceTags
 	});
 	
 	tagListWindow.addEventListener('close', function(e){

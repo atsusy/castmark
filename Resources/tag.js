@@ -53,6 +53,9 @@ var tagContent = Ti.UI.createTextArea({
 });
 
 tagWindow.addEventListener('open', function(e){
+	if(tagWindow.initial_content){
+		tagContent.value = tagWindow.initial_content;
+	}
 	tagContent.focus();
 });
 
@@ -77,6 +80,8 @@ var candidateSearcher = setInterval(function(){
 			candidateSearching.show();
 			var xhr = Ti.Network.createHTTPClient();
 			xhr.onload = function(){
+				Ti.API.debug("onload:"+this.responseText);
+
 				var result = eval(this.responseText);
 				if(result.length && result[0].similars){
 					candidates = result[0].similars;
@@ -87,18 +92,25 @@ var candidateSearcher = setInterval(function(){
 					candidatesIndex = 0;
 				}else{
 					candidates = [];
-					candidateSwitcher.buttonEnabled(0, false);
-					candidateSwitcher.buttonEnabled(1, true);
-					candidateSwitcher.buttonEnabled(2, false);
-					candidateText.text = lastword;
 					candidatesIndex = 0;
 				}
 				candidateSearching.hide();
 			};
-			xhr.onerror = function(){
+			xhr.onerror = function(e){
+				Ti.API.debug("error:"+e.error);
 				candidateSearching.hide();
 			};
-			xhr.open('GET', 'http://lab.nulab.co.jp/spellchecker-2007-08-20/check?text='+lastword);
+			
+			var url = 'http://lab.nulab.co.jp/spellchecker-2007-08-20/check?text='+lastword;
+			//var appid = 'ZW2CGsnV34GqqouxjffnnRSPIYuzAB_0TmmMAPhILxWICJ6DHTIFto1MMOSqMZ8oxtxUxJ2P';
+			//var url = 'http://search.yahooapis.com/WebSearchService/V1/spellingSuggestion?appid='+appid+'&output=json&query='+lastword;
+			xhr.open('GET', url);
+			
+			candidateSwitcher.buttonEnabled(0, false);
+			candidateSwitcher.buttonEnabled(1, true);
+			candidateSwitcher.buttonEnabled(2, false);
+			candidateText.text = lastword;
+
 			xhr.send();
 		}
 	}else{
@@ -123,10 +135,6 @@ candidateText.addEventListener('click', function(e){
 });
 
 candidateSwitcher.addEventListener('click', function(e){
-	if(!candidates){
-		return;
-	}
-	
 	if(e.index == 1){
 		var dictionaryWindow = Ti.UI.createWindow({
 			url:'dictionary.js',
@@ -141,7 +149,10 @@ candidateSwitcher.addEventListener('click', function(e){
 		return;
 	}
 
-	
+	if(!candidates){
+		return;
+	}
+		
 	if(e.index == 0){
 		if(candidatesIndex > 0){
 			candidatesIndex--;

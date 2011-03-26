@@ -8,3 +8,6 @@
 - [new!]modify tag contents.
 - [new!]show tag lists.
 - some bug fixes. 
+
+1.1.1 2011/3/24 KATAOKA,Atsushi
+- changed spell-checker to 'Google Toolbar Spell Check API'.

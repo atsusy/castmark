@@ -1,1 +1,10 @@
-Place your change log text here.  This file will be incorporated with your app at package time.
+1.0.0 2011/3/12 KATAOKA,Atsushi 
+- 1st release.
+
+1.1.0 2011/3/25 KATAOKA,Atsushi
+- [new!]i18n.(Japanese)
+- [new!]rewind 15sec.
+- [new!]change tag point.
+- [new!]modify tag contents.
+- [new!]show tag lists.
+- some bug fixes. 

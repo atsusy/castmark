@@ -79,6 +79,7 @@ var candidateSearcher = setInterval(function(){
 
 			candidateSearching.show();
 			var xhr = Ti.Network.createHTTPClient();
+			/*
 			xhr.onload = function(){
 				Ti.API.debug("onload:"+this.responseText);
 
@@ -87,7 +88,26 @@ var candidateSearcher = setInterval(function(){
 					candidates = result[0].similars;
 					candidateSwitcher.buttonEnabled(0, false);
 					candidateSwitcher.buttonEnabled(1, true);
-					candidateSwitcher.buttonEnabled(2, (candidates.length > 1));
+					candidateSwitcher.buttonEnabled(2, true);
+					candidateText.text = candidates[0];
+					candidatesIndex = 0;
+				}else{
+					candidates = [];
+					candidatesIndex = 0;
+				}
+				candidateSearching.hide();
+			};
+			*/
+			xhr.onload = function(){
+				Ti.API.info(this.responseText);
+				var doc = Ti.XML.parseString(this.responseText);
+				if(doc && 
+				   doc.getElementsByTagName('c') &&
+				   doc.getElementsByTagName('c').length > 0){
+					candidates = doc.getElementsByTagName("c").item(0).text.split('\t');
+					candidateSwitcher.buttonEnabled(0, false);
+					candidateSwitcher.buttonEnabled(1, true);
+					candidateSwitcher.buttonEnabled(2, true);
 					candidateText.text = candidates[0];
 					candidatesIndex = 0;
 				}else{
@@ -100,18 +120,16 @@ var candidateSearcher = setInterval(function(){
 				Ti.API.debug("error:"+e.error);
 				candidateSearching.hide();
 			};
-			
-			var url = 'http://lab.nulab.co.jp/spellchecker-2007-08-20/check?text='+lastword;
-			//var appid = 'ZW2CGsnV34GqqouxjffnnRSPIYuzAB_0TmmMAPhILxWICJ6DHTIFto1MMOSqMZ8oxtxUxJ2P';
-			//var url = 'http://search.yahooapis.com/WebSearchService/V1/spellingSuggestion?appid='+appid+'&output=json&query='+lastword;
-			xhr.open('GET', url);
+			var url = 'https://www.google.com/tbproxy/spell?lang=en&hl=en';
+			xhr.open('POST', url);
 			
 			candidateSwitcher.buttonEnabled(0, false);
 			candidateSwitcher.buttonEnabled(1, true);
 			candidateSwitcher.buttonEnabled(2, false);
 			candidateText.text = lastword;
 
-			xhr.send();
+			var data = '<?xml version="1.0" encoding="utf-8" ?><spellrequest textalreadyclipped="0" ignoredups="0" ignoredigits="1" ignoreallcaps="1"><text>'+lastword+'</text></spellrequest>';
+			xhr.send(data);
 		}
 	}else{
 		clearCandidates();

@@ -37,6 +37,12 @@ var addFeedButton = Titanium.UI.createButton({
 	systemButton: Ti.UI.iPhone.SystemButton.ADD 
 }); 
 
+var feedsAdding = Titanium.UI.createActivityIndicator({
+	width:32,
+	height:32,
+	style:Ti.UI.iPhone.ActivityIndicatorStyle.DARK	
+});
+
 var feedsTable = Titanium.UI.createTableView({
 	editable:true,
 	data:dataOfFeeds()
@@ -52,18 +58,38 @@ addFeedButton.addEventListener('click', function(e){
 		navBarHidden:false
 	});
 	window.addEventListener('close', function(e){
-		if(e.source.selectedFeed){
-			var feed = e.source.selectedFeed;
+		if(e.source.selected){
+			var feed = new Feed({
+				name:e.source.selected.name,
+				url:e.source.selected.url,
+				image:e.source.selected.image
+			});
 			if(!Feed.contains(feed)){
-				feed.add();
+				feedsAdding.show();
+				feed.items(function(items){
+					for(var j = 0; j < items.length; j++){
+						var item = items[j];
+						var history = new History({
+							name:feed.name,
+							image:feed.image,
+							url:item.url,
+							title:item.title,
+							pubDate:item.pubDate
+						});
+						history.addOrUpdate();
+					}
+					feed.add();
+					feedsTable.data = dataOfFeeds();
+					feedsAdding.hide();
+				});
 			}else{
 				Ti.API.info("feed["+feed.name+"] is already added");
-			}
+			}	
 		}
-		feedsTable.data = dataOfFeeds();
 	});
 	Ti.UI.currentTab.open(window, {animated:true});
 });
 
+feedsTable.add(feedsAdding);
 feedWindow.rightNavButton = addFeedButton;
 feedWindow.add(feedsTable);

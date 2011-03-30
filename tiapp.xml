@@ -2,12 +2,12 @@
 <ti:app xmlns:ti="http://ti.appcelerator.org">
 <id>jp.co.langrise.castmark</id>
 <name>castmark</name>
-<version>1.0</version>
+<version>1.1.2</version>
 <publisher>LANGRISE Co.,Ltd.</publisher>
 <url>http://www.langrise.co.jp</url>
 <description>castmark is markable podcast player.</description>
 <copyright>2011 by LANGRISE Co.,Ltd.</copyright>
-<icon>appicon.png</icon>
+<icon>default_app_logo.png</icon>
     <persistent-wifi>false</persistent-wifi>
     <prerendered-icon>false</prerendered-icon>
     <statusbar-style>default</statusbar-style>

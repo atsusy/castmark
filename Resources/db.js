@@ -36,22 +36,27 @@ function Feed(args){
 		Ti.API.info("feed was removed. name:"+this.name+" url:"+this.url);
 	};
 		
-	this.items = function(onloaded){
-		var query = 'SELECT * FROM rss WHERE url="'+this.url+'" limit 20';		
+	this.items = function(onloaded, since){
+		var query = "SELECT * FROM rss WHERE url='"+this.url+"'";
+		if(since){
+			query += " and pubDate > '"+yqlDate(since)+"'";
+		}
 		var sender = this;
 		sender.__onloaded__ = onloaded;
 		var name = this.name;
 		var image = this.image;
-		Titanium.Yahoo.yql(query, function (d) {
+		var url = this.url;
+		
+		Titanium.Yahoo.yql(query, function(d){
 			if(!d.success){
 				Ti.API.error("yql error:"+d.message);
-				Ti.API.error(d.message);
 				sender.__onloaded__([]);
 				return;
 			}
 			
 			if(!d.data || !d.data.item)
 			{
+				Ti.API.info("yql result has no item. url:"+url);
 				sender.__onloaded__([]);
 				return;
 			}
@@ -92,8 +97,7 @@ function Feed(args){
 			}
 			sender.__onloaded__(items);
 		});
-
-		Ti.API.info("attempt to load feed items:"+this.url);
+		Ti.API.info("attempt to load feed items:"+query);
 	};
 	
 	return this;
@@ -193,9 +197,24 @@ function History(args){
 	return this;
 };
 
-History.lists = function(){
+History.lists = function(args){
 	return exec_db(function(db){
-		var rows = db.execute('SELECT * FROM HISTORY ORDER BY PLAYDATE DESC');
+		var query = 'SELECT * FROM HISTORY';
+		if(args){
+			if(args.byPubDate){
+				query += ' ORDER BY PUBDATE DESC ';
+			}else if(args.byPlayDate){
+				query += ' WHERE PLAYDATE IS NOT NULL ORDER BY PLAYDATE DESC ';
+			}
+
+			if(args.limit){
+				query += ' LIMIT '+args.limit;
+			}
+			if(args.offset){
+				query += ' OFFSET '+args.offset;
+			}
+		}
+		var rows = db.execute(query);
 		var histories = [];
 		while (rows.isValidRow()){
 			histories.push(new History({ name:rows.field(0),
@@ -206,7 +225,7 @@ History.lists = function(){
 								     playDate:Number(rows.field(5)),
 								     progress:rows.field(6),
 								     duration:rows.field(7)}));
-			Ti.API.info("history listed. url:"+rows.field(2)+" pubDate:"+Number(rows.field(4))+" playDate:"+Number(rows.field(5))+" progress:"+rows.field(6)+" duration:"+rows.field(7));
+			//Ti.API.info("history listed. url:"+rows.field(2)+" pubDate:"+Number(rows.field(4))+" playDate:"+Number(rows.field(5))+" progress:"+rows.field(6)+" duration:"+rows.field(7));
 			rows.next();
 		}
 		return histories;		

@@ -104,11 +104,11 @@ webView.addEventListener('error', function(e){
 				Ti.API.info("title:"+title+" items:"+items.length+" image:"+image);
 				// has title and items
 				if(title && items.length > 0){
-					window.selectedFeed = new Feed({
+					window.selected = {
 						name:title,
 						image:image,
 						url:url
-					});
+					};
 					window.close();
 					return;
 				}

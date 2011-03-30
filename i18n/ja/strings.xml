@@ -13,4 +13,9 @@
 	<string name="Close">閉じる</string>
 	<string name="DictionaryNoEntry">辞書に記述がない、もしくはネットワークエラーです。</string>
 	<string name="PointEditNotClosed">記録時間の編集ウィンドウを閉じて下さい。</string>
+	<string name="PullDownToRefresh">引っ張ってプレイリストを更新します</string>
+	<string name="LastUpdated">最終更新日時: </string>	
+	<string name="ReleaseToRefresh">離すとプレイリストを更新します</string>
+	<string name="Reloading">プレイリスト更新中...</string>
+	<string name="NextPlaylistPage">さらにプレイリストを読み込む...</string>
 </resources>

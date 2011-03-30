@@ -13,5 +13,9 @@
 	<string name="Close">Close</string>
 	<string name="DictionaryNoEntry">no entries, or network error.</string>
 	<string name="PointEditNotClosed">Close Point-Edit dialog.</string>
-	
+	<string name="PullDownToRefresh">Pull down to refresh playlist.</string>
+	<string name="LastUpdated">Last updated: </string>	
+	<string name="ReleaseToRefresh">Release to refresh playlist.</string>
+	<string name="Reloading">Reloading...</string>
+	<string name="NextPlaylistPage">Tap to load more...</string>
 </resources>
